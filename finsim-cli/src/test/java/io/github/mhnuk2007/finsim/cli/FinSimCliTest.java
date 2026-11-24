@@ -215,6 +215,21 @@ class FinSimCliTest {
   }
 
   @Test
+  void baseUrlWithQueryOrFragmentIsRejectedBeforeSendingRequest() throws Exception {
+    String url = stubFinSim(200, "[]");
+
+    Result queryResult = run("institutions", "--finsim", url + "/?mode=test");
+    assertThat(queryResult.exit()).isEqualTo(CommandLine.ExitCode.USAGE);
+    assertThat(queryResult.err()).contains("must not contain a query or fragment");
+    assertThat(lastPath.get()).isNull();
+
+    Result fragmentResult = run("institutions", "--finsim", url + "/#section");
+    assertThat(fragmentResult.exit()).isEqualTo(CommandLine.ExitCode.USAGE);
+    assertThat(fragmentResult.err()).contains("must not contain a query or fragment");
+    assertThat(lastPath.get()).isNull();
+  }
+
+  @Test
   void joinPostsTheMember() throws Exception {
     String url = stubFinSim(200, "{}");
 

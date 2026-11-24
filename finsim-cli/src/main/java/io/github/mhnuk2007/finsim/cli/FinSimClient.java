@@ -29,6 +29,11 @@ final class FinSimClient {
   }
 
   private URI resolveUri(String path) {
+    URI baseUri = URI.create(baseUrl);
+    if (baseUri.getRawQuery() != null || baseUri.getRawFragment() != null) {
+      throw new IllegalArgumentException("FinSim base URL must not contain a query or fragment");
+    }
+
     String normalizedBaseUrl = baseUrl;
     while (normalizedBaseUrl.endsWith("/")) {
       normalizedBaseUrl = normalizedBaseUrl.substring(0, normalizedBaseUrl.length() - 1);
