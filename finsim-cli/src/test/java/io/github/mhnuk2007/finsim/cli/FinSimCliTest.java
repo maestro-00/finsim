@@ -201,6 +201,20 @@ class FinSimCliTest {
   }
 
   @Test
+  void endpointPathsPreserveContextPathAndNormalizeSlashes() throws Exception {
+    String url = stubFinSim(200, "[]");
+
+    assertThat(run("institutions", "--finsim", url + "/prefix").exit()).isZero();
+    assertThat(lastPath.get()).isEqualTo("/prefix/api/v1/institutions");
+
+    assertThat(run("institutions", "--finsim", url + "/prefix/").exit()).isZero();
+    assertThat(lastPath.get()).isEqualTo("/prefix/api/v1/institutions");
+
+    assertThat(run("institutions", "--finsim", url + "/").exit()).isZero();
+    assertThat(lastPath.get()).isEqualTo("/api/v1/institutions");
+  }
+
+  @Test
   void joinPostsTheMember() throws Exception {
     String url = stubFinSim(200, "{}");
 
