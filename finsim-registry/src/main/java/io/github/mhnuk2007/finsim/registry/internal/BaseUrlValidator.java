@@ -47,6 +47,9 @@ public final class BaseUrlValidator {
     if (uri.getUserInfo() != null) {
       throw new InvalidInstitution("baseUrl must not contain credentials.");
     }
+    if (uri.getRawQuery() != null) {
+      throw new InvalidInstitution("baseUrl must not contain a query string.");
+    }
     if (uri.getFragment() != null) {
       throw new InvalidInstitution("baseUrl must not contain a fragment.");
     }

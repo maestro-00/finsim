@@ -67,6 +67,10 @@ class BaseUrlValidatorTest {
         .isInstanceOf(InvalidInstitution.class);
     assertThatThrownBy(() -> BaseUrlValidator.validate("http://host#frag", true))
         .isInstanceOf(InvalidInstitution.class);
+    assertThatThrownBy(() -> BaseUrlValidator.validate("http://host?foo=bar", true))
+        .isInstanceOf(InvalidInstitution.class);
+    assertThatThrownBy(() -> BaseUrlValidator.validate("http://host?", true))
+        .isInstanceOf(InvalidInstitution.class);
     assertThatThrownBy(() -> BaseUrlValidator.validate("not a url", true))
         .isInstanceOf(InvalidInstitution.class);
     assertThatThrownBy(() -> BaseUrlValidator.validate("http://", true))

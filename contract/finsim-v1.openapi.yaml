@@ -644,7 +644,7 @@ components:
         baseUrl:
           type: string
           format: uri
-          description: http(s) URL of the institution's participant API. No credentials or fragment; private or loopback addresses are rejected unless the server allows them.
+          description: http(s) URL of the institution's participant API. No credentials, query string, or fragment; private or loopback addresses are rejected unless the server allows them.
         capabilities:
           type: array
           minItems: 1
@@ -690,7 +690,7 @@ components:
         baseUrl:
           type: string
           format: uri
-          description: http(s) URL of the institution's participant API. No credentials or fragment; private or loopback addresses are rejected unless the server allows them.
+          description: http(s) URL of the institution's participant API. No credentials, query string, or fragment; private or loopback addresses are rejected unless the server allows them.
         capabilities:
           type: array
           minItems: 1
