@@ -220,6 +220,47 @@ class FaultApiTests {
   }
 
   @Test
+  @DisplayName("Target length is validated before persistence")
+  void targetLengthIsValidated() throws Exception {
+    String tooLongTarget = "a".repeat(65);
+    HttpResponse<String> tooLong =
+        postFault(
+            """
+            {"target": "%s", "type": "TIMEOUT"}
+            """
+                .formatted(tooLongTarget));
+    assertThat(tooLong.statusCode()).isEqualTo(400);
+
+    String maxLengthTarget = "a".repeat(64);
+    HttpResponse<String> maxLength =
+        postFault(
+            """
+            {"target": "%s", "type": "TIMEOUT"}
+            """
+                .formatted(maxLengthTarget));
+    assertThat(maxLength.statusCode()).isEqualTo(201);
+  }
+
+  @Test
+  @DisplayName("Client faultId is ignored after evaluating the rule")
+  void clientFaultIdDoesNotCauseOptimisticLockingFailure() throws Exception {
+    String request =
+        """
+        {"faultId": "client-rule-id", "target": "bank-b", "type": "TIMEOUT", "times": 3}
+        """;
+    HttpResponse<String> first = postFault(request);
+    assertThat(first.statusCode()).isEqualTo(201);
+    String firstId = JsonPath.read(first.body(), "$.faultId");
+
+    assertThat(faultService.evaluateOutboundCall("bank-b").triggered()).isTrue();
+
+    HttpResponse<String> second = postFault(request);
+    assertThat(second.statusCode()).isEqualTo(201);
+    String secondId = JsonPath.read(second.body(), "$.faultId");
+    assertThat(secondId).isNotEqualTo(firstId).isNotEqualTo("client-rule-id");
+  }
+
+  @Test
   @DisplayName("List and delete fault rules")
   void listAndDeleteFaultRules() throws Exception {
     postFault(

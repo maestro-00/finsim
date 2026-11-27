@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import io.github.mhnuk2007.finsim.faults.internal.FaultRuleEntity;
 import io.github.mhnuk2007.finsim.faults.internal.FaultRuleRepository;
 import io.github.mhnuk2007.finsim.sim.FaultDecision;
+import io.github.mhnuk2007.finsim.sim.FaultEvaluator;
 import io.github.mhnuk2007.finsim.sim.FaultType;
 import java.time.Clock;
 import java.time.Instant;
@@ -81,5 +82,23 @@ class FaultServiceTest {
 
     assertThat(decision.triggered()).isFalse();
     verify(repository, times(16)).decrementRemainingCountIfPositive(eq("f-3"), any());
+  }
+
+  @Test
+  @DisplayName("Registration resets PRNG state for the saved rule id")
+  void registerResetsPrngForSavedId() {
+    FaultEvaluator evaluator = mock(FaultEvaluator.class);
+    FaultRuleEntity saved =
+        new FaultRuleEntity("generated-id", "bank-b", FaultType.TIMEOUT, null, 1.0, null, 42L, NOW);
+    when(repository.save(any(FaultRuleEntity.class))).thenReturn(saved);
+    FaultService service =
+        new FaultService(repository, evaluator, Clock.fixed(NOW, ZoneOffset.UTC));
+
+    FaultRuleDto created =
+        service.register(
+            new FaultRuleDto("client-id", "bank-b", FaultType.TIMEOUT, null, null, null, 42L));
+
+    assertThat(created.faultId()).isEqualTo("generated-id");
+    verify(evaluator).resetPrng("generated-id");
   }
 }

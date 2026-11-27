@@ -72,10 +72,7 @@ public class FaultService {
   public FaultRuleDto register(FaultRuleDto request) {
     validate(request);
 
-    String id =
-        request.faultId() != null && !request.faultId().isBlank()
-            ? request.faultId()
-            : UUID.randomUUID().toString();
+    String id = UUID.randomUUID().toString();
 
     Instant now = Instant.now(clock);
     FaultRuleEntity entity =
@@ -90,6 +87,7 @@ public class FaultService {
             now);
 
     FaultRuleEntity saved = repository.save(entity);
+    evaluator.resetPrng(saved.getId());
     return toDto(saved);
   }
 
@@ -169,6 +167,9 @@ public class FaultService {
     }
     if (dto.target() == null || dto.target().isBlank()) {
       throw new IllegalArgumentException("Target institution is required.");
+    }
+    if (dto.target().trim().length() > 64) {
+      throw new IllegalArgumentException("Target institution must be at most 64 characters.");
     }
     if (dto.type() == null) {
       throw new IllegalArgumentException("Fault type is required.");
